@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>BharatTrip • AI Refund Operations Hub</title>
+  <!-- Tailwind CSS & Google Fonts -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+          colors: {
+            brand: { 50: '#eef2ff', 100: '#e0e7ff', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca', 900: '#1e1b4b' }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .glass-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); }
+    .tab-active { color: #4f46e5; border-bottom: 2px solid #4f46e5; font-weight: 700; }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  </style>
+</head>
+<body class="bg-[#f8fafc] text-slate-800 antialiased min-h-screen flex flex-col">
+
+  <!-- TOP ENTERPRISE NAVBAR -->
+  <header class="glass-nav border-b border-slate-200/80 sticky top-0 z-30 px-6 py-3.5 transition-all">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      
+      <!-- BRAND LOGO & SYSTEM BADGE -->
+      <div class="flex items-center gap-4">
+        <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-brand-700 via-brand-600 to-indigo-500 flex items-center justify-center text-white font-black text-lg shadow-md shadow-brand-500/20 tracking-wider">
+          BT
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-extrabold text-slate-900 text-base tracking-tight">BharatTrip</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/60 uppercase tracking-widest">AI Ops 2.0</span>
+          </div>
+          <p class="text-xs text-slate-500 font-medium">Single Source of Truth • Refund Lifecycle Engine</p>
+        </div>
+      </div>
+
+      <!-- RIGHT CONTROLS: RBAC & LIVE USER -->
+      <div class="flex items-center gap-3">
+        <!-- USER PROFILE BADGE -->
+        <div class="hidden sm:flex items-center gap-2.5 bg-slate-100/80 border border-slate-200/60 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-700">
+          <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+          <i class="fa-regular fa-circle-user text-slate-400"></i>
+          <span id="userEmail"><?= userEmail ?></span>
+        </div>
+
+        <!-- ROLE SWITCHER (FOR RECRUITER DEMO) -->
+        <div class="flex items-center gap-1.5 bg-white border border-slate-200 shadow-sm rounded-xl px-3 py-1.5">
+          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">VIEW:</span>
+          <select id="roleSwitcher" onchange="switchRole(this.value)" class="text-xs font-bold text-brand-700 bg-transparent focus:outline-none cursor-pointer">
+            <option value="ADMIN">👑 Ops Lead / Admin</option>
+            <option value="SUPPORT">🎧 Support Agent</option>
+            <option value="FINANCE">💳 Finance Officer</option>
+          </select>
+        </div>
+
+        <!-- REFRESH BUTTON -->
+        <button onclick="loadTickets()" class="bg-brand-600 hover:bg-brand-700 active:scale-95 text-white px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm shadow-brand-500/20 transition">
+          <i class="fa-solid fa-rotate text-[11px]"></i>
+          <span>Sync</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN BODY -->
+  <main class="max-w-7xl mx-auto w-full px-6 py-6 space-y-6 flex-1">
+
+    <!-- KPI STATS CARDS -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <!-- Total Active -->
+      <div class="bg-white p-5 rounded-2xl border border-slate-200/70 shadow-sm relative overflow-hidden group hover:border-slate-300 transition">
+        <div class="flex justify-between items-start">
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Active Pipeline</span>
+          <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600 text-xs">
+            <i class="fa-solid fa-layer-group"></i>
+          </div>
+        </div>
+        <div class="mt-3 flex items-baseline gap-2">
+          <span id="kpiActive" class="text-3xl font-extrabold text-slate-900 tracking-tight">--</span>
+          <span class="text-[11px] text-slate-400 font-semibold">total in queue</span>
+        </div>
+      </div>
+
+      <!-- Support Review -->
+      <div class="bg-white p-5 rounded-2xl border border-slate-200/70 shadow-sm relative overflow-hidden group hover:border-amber-300 transition">
+        <div class="flex justify-between items-start">
+          <span class="text-xs font-bold text-amber-600 uppercase tracking-wider">Support Intake</span>
+          <div class="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600 text-xs">
+            <i class="fa-solid fa-headset"></i>
+          </div>
+        </div>
+        <div class="mt-3 flex items-baseline gap-2">
+          <span id="kpiSupport" class="text-3xl font-extrabold text-slate-900 tracking-tight">--</span>
+          <span class="text-[11px] text-amber-600 font-semibold">needs fare check</span>
+        </div>
+      </div>
+
+      <!-- Finance Payout -->
+      <div class="bg-white p-5 rounded-2xl border border-slate-200/70 shadow-sm relative overflow-hidden group hover:border-indigo-300 transition">
+        <div class="flex justify-between items-start">
+          <span class="text-xs font-bold text-brand-600 uppercase tracking-wider">Finance Queue</span>
+          <div class="w-8 h-8 rounded-lg bg-brand-50 flex items-center justify-center text-brand-600 text-xs">
+            <i class="fa-solid fa-money-check-dollar"></i>
+          </div>
+        </div>
+        <div class="mt-3 flex items-baseline gap-2">
+          <span id="kpiFinance" class="text-3xl font-extrabold text-slate-900 tracking-tight">--</span>
+          <span class="text-[11px] text-brand-600 font-semibold">verified for payout</span>
+        </div>
+      </div>
+
+      <!-- Settled Today -->
+      <div class="bg-white p-5 rounded-2xl border border-slate-200/70 shadow-sm relative overflow-hidden group hover:border-emerald-300 transition">
+        <div class="flex justify-between items-start">
+          <span class="text-xs font-bold text-emerald-600 uppercase tracking-wider">Settled & Closed</span>
+          <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600 text-xs">
+            <i class="fa-solid fa-circle-check"></i>
+          </div>
+        </div>
+        <div class="mt-3 flex items-baseline gap-2">
+          <span id="kpiSettled" class="text-3xl font-extrabold text-slate-900 tracking-tight">--</span>
+          <span class="text-[11px] text-emerald-600 font-semibold">disbursed via NEFT</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN DATA BOARD -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col">
+      
+      <!-- TOOLBAR & TABS -->
+      <div class="px-6 pt-4 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        
+        <!-- WORKSPACE TABS -->
+        <div class="flex gap-8 text-xs font-semibold" id="navTabs">
+          <button onclick="setTab('support')" id="tab-support" class="pb-3.5 tab-active transition flex items-center gap-2">
+            <i class="fa-solid fa-headset text-sm"></i>
+            <span>Support Queue</span>
+            <span id="badgeSupport" class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold text-[10px]">0</span>
+          </button>
+          <button onclick="setTab('finance')" id="tab-finance" class="pb-3.5 text-slate-500 hover:text-slate-800 transition flex items-center gap-2">
+            <i class="fa-solid fa-credit-card text-sm"></i>
+            <span>Finance Queue</span>
+            <span id="badgeFinance" class="bg-brand-100 text-brand-800 px-2 py-0.5 rounded-full font-bold text-[10px]">0</span>
+          </button>
+          <button onclick="setTab('all')" id="tab-all" class="pb-3.5 text-slate-500 hover:text-slate-800 transition flex items-center gap-2">
+            <i class="fa-solid fa-database text-sm"></i>
+            <span>Master Audit Ledger</span>
+          </button>
+        </div>
+
+        <!-- SEARCH & CHANNELS -->
+        <div class="flex items-center gap-3 pb-3">
+          <div class="relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-2.5 text-slate-400 text-xs"></i>
+            <input type="text" id="searchInput" onkeyup="renderTable()" placeholder="Search RF-ID, Agent, Route..." 
+                   class="pl-9 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white w-60 transition">
+          </div>
+          <select id="channelFilter" onchange="renderTable()" class="text-xs font-semibold bg-slate-50 border border-slate-200 py-1.5 px-3 rounded-xl text-slate-700 focus:outline-none">
+            <option value="ALL">All Channels</option>
+            <option value="WhatsApp">🟢 WhatsApp</option>
+            <option value="Email">🔴 Email</option>
+            <option value="Portal">🔵 Web Portal</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- TABLE CONTAINER -->
+      <div class="overflow-x-auto custom-scrollbar">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr class="bg-slate-50/60 text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-100">
+              <th class="py-3 px-5">Ticket ID</th>
+              <th class="py-3 px-5">Travel Agent</th>
+              <th class="py-3 px-5">Sector</th>
+              <th class="py-3 px-5">Claim (INR)</th>
+              <th class="py-3 px-5">Channel</th>
+              <th class="py-3 px-5">Lifecycle State</th>
+              <th class="py-3 px-5">Payout Status</th>
+              <th class="py-3 px-5 text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody id="ticketTableBody" class="divide-y divide-slate-100 font-medium">
+            <tr>
+              <td colspan="8" class="text-center py-16 text-slate-400">
+                <i class="fa-solid fa-circle-notch fa-spin text-brand-600 text-xl mb-2"></i>
+                <p>Loading live records from Master Google Sheet...</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- SIDE DRAWER: TICKET INSPECTOR & AUDIT TRAIL -->
+  <div id="drawerBackdrop" onclick="closeDrawer()" class="fixed inset-0 bg-slate-900/30 backdrop-blur-sm z-40 hidden transition-opacity"></div>
+  <aside id="ticketDrawer" class="fixed right-0 top-0 bottom-0 w-full max-w-lg bg-white z-50 shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out p-6 flex flex-col justify-between overflow-y-auto">
+    <div class="space-y-6">
+      <div class="flex justify-between items-start border-b border-slate-100 pb-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <h3 id="drawerTicketId" class="text-xl font-black text-brand-700">RF-XXXX</h3>
+            <span id="drawerChannelBadge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700">Email</span>
+          </div>
+          <p id="drawerAgent" class="text-sm font-semibold text-slate-700 mt-0.5">Travel Partner Name</p>
+        </div>
+        <button onclick="closeDrawer()" class="h-8 w-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- TICKET DETAILS GRID -->
+      <div class="grid grid-cols-2 gap-4 text-xs">
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+          <span class="text-[10px] font-bold text-slate-400 uppercase">Sector / Route</span>
+          <p id="drawerRoute" class="text-sm font-bold text-slate-900 mt-0.5">DEL-DXB</p>
+        </div>
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+          <span class="text-[10px] font-bold text-slate-400 uppercase">Claim Amount</span>
+          <p id="drawerAmount" class="text-sm font-black text-slate-900 mt-0.5">₹0</p>
+        </div>
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+          <span class="text-[10px] font-bold text-slate-400 uppercase">Sender Contact</span>
+          <p id="drawerContact" class="text-xs font-semibold text-slate-800 mt-0.5 truncate">agent@email.com</p>
+        </div>
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+          <span class="text-[10px] font-bold text-slate-400 uppercase">AI Confidence</span>
+          <p id="drawerConfidence" class="text-xs font-bold text-emerald-600 mt-0.5">98% High</p>
+        </div>
+      </div>
+
+      <!-- RAW INGESTED MESSAGE (THE PROOF) -->
+      <div class="space-y-1.5">
+        <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+          <i class="fa-solid fa-message text-slate-400"></i> Ingested Raw Message
+        </label>
+        <div id="drawerRawMessage" class="bg-slate-900 text-slate-200 p-3.5 rounded-xl text-xs font-mono whitespace-pre-wrap leading-relaxed max-h-48 overflow-y-auto">
+          No raw message logged.
+        </div>
+      </div>
+
+      <!-- NOTES & AUDIT TRAIL -->
+      <div class="space-y-1.5">
+        <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+          <i class="fa-solid fa-clipboard-list text-slate-400"></i> Ops Notes & Deductions
+        </label>
+        <div id="drawerNotes" class="bg-slate-50 border border-slate-200 p-3 rounded-xl text-xs text-slate-700 leading-relaxed">
+          Standard intake.
+        </div>
+      </div>
+    </div>
+
+    <!-- DRAWER ACTIONS -->
+    <div id="drawerActions" class="border-t border-slate-100 pt-4 flex gap-3">
+      <!-- Injected Dynamically -->
+    </div>
+  </aside>
+
+  <!-- MODAL: FINANCE SETTLEMENT WITH DEDUCTION -->
+  <div id="modalSettle" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 border border-slate-100">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm font-bold">
+            <i class="fa-solid fa-wallet"></i>
+          </div>
+          <h3 class="font-bold text-slate-900 text-base">Authorize Payout Settlement</h3>
+        </div>
+        <button onclick="closeModal('modalSettle')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="space-y-3.5 text-xs">
+        <div class="bg-slate-50 p-3 rounded-xl flex justify-between items-center">
+          <span class="text-slate-500 font-medium">Ticket: <strong id="modalTicketId" class="text-brand-700 font-bold">RF-XXXX</strong></span>
+          <span id="modalAgent" class="text-slate-800 font-semibold truncate max-w-[180px]">Agent</span>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Gross Claim Amount (INR)</label>
+          <input type="number" id="modalGross" readonly class="w-full bg-slate-100 border border-slate-200 px-3 py-2 rounded-xl font-bold text-slate-800">
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Airline Deduction / Cancellation Fee (INR)</label>
+          <input type="number" id="modalDeduction" value="0" oninput="calculateNet()" class="w-full border border-slate-300 px-3 py-2 rounded-xl focus:ring-2 focus:ring-brand-500 font-bold text-slate-900">
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Deduction Reason (Included in Message 2 Notification)</label>
+          <select id="modalDeductionReason" class="w-full border border-slate-300 px-3 py-2 rounded-xl font-medium focus:ring-2 focus:ring-brand-500 bg-white">
+            <option value="Standard Airline Cancellation Fee">Standard Airline Cancellation Fee (Tariff Rule)</option>
+            <option value="No-Show Penalty as per Airline">No-Show Penalty Applied</option>
+            <option value="Partially Flown Sector Adjustment">Partially Used / Flown Sector</option>
+            <option value="Agency Service Fee">Agency Service Fee</option>
+          </select>
+        </div>
+
+        <div class="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200/80 p-3.5 rounded-xl flex justify-between items-center">
+          <span class="font-bold text-emerald-800 text-xs">Net Bank Transfer:</span>
+          <span id="modalNet" class="text-xl font-black text-emerald-900">₹0</span>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2.5 pt-2 border-t border-slate-100">
+        <button onclick="closeModal('modalSettle')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-semibold text-slate-600 transition">Cancel</button>
+        <button onclick="submitFinanceSettlement()" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-500/20 transition flex items-center gap-1.5">
+          <i class="fa-solid fa-check"></i> Settle & Notify Agent
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: FINANCE DECLINE WITH REASON -->
+  <div id="modalDecline" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 border border-slate-100">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center text-sm font-bold">
+            <i class="fa-solid fa-ban"></i>
+          </div>
+          <h3 class="font-bold text-rose-600 text-base">Decline Refund Claim</h3>
+        </div>
+        <button onclick="closeModal('modalDecline')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="space-y-3.5 text-xs">
+        <p class="text-slate-600">Ticket: <strong id="declineTicketId" class="text-slate-900 font-bold">RF-XXXX</strong></p>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Mandatory Policy Reason (Sent in Message 2)</label>
+          <select id="declineReasonCode" class="w-full border border-slate-300 px-3 py-2 rounded-xl font-medium focus:ring-2 focus:ring-rose-500 bg-white">
+            <option value="Non-refundable promotional fare as per airline policy">Non-refundable Promotional Fare Rule</option>
+            <option value="Cancellation requested after flight departure (No-show)">Request Submitted Post Flight Departure</option>
+            <option value="Ticket fully utilized / flown by passenger">Ticket already flown by passenger</option>
+            <option value="Direct refund already issued by airline to customer">Direct refund issued by airline</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Additional Internal Notes</label>
+          <textarea id="declineNotes" rows="2.5" placeholder="Reasoning for audit trail..." class="w-full border border-slate-300 px-3 py-2 rounded-xl font-medium focus:ring-2 focus:ring-rose-500"></textarea>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2.5 pt-2 border-t border-slate-100">
+        <button onclick="closeModal('modalDecline')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-semibold text-slate-600 transition">Cancel</button>
+        <button onclick="submitFinanceDecline()" class="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-md shadow-rose-500/20 transition flex items-center gap-1.5">
+          <i class="fa-solid fa-ban"></i> Confirm Decline & Notify
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-xl flex items-center gap-3 text-xs font-semibold">
+    <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
+    <span id="toastMsg">Action completed successfully</span>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    let allTickets = [];
+    let currentTab = 'support';
+    let currentRole = '<?= userRole ?>' || 'ADMIN';
+    let activeTicket = null;
+
+    window.onload = function() {
+      document.getElementById('roleSwitcher').value = currentRole;
+      loadTickets();
+    };
+
+    function switchRole(newRole) {
+      currentRole = newRole;
+      if (currentRole === 'SUPPORT') setTab('support');
+      else if (currentRole === 'FINANCE') setTab('finance');
+      else setTab('all');
+      showToast(`Switched view to: ${newRole}`, 'info');
+    }
+
+    function setTab(tab) {
+      currentTab = tab;
+      ['support', 'finance', 'all'].forEach(t => {
+        const btn = document.getElementById(`tab-${t}`);
+        if (t === tab) btn.className = 'pb-3.5 tab-active transition flex items-center gap-2';
+        else btn.className = 'pb-3.5 text-slate-500 hover:text-slate-800 transition flex items-center gap-2';
+      });
+      renderTable();
+    }
+
+    function loadTickets() {
+      const tbody = document.getElementById('ticketTableBody');
+      tbody.innerHTML = `<tr><td colspan="8" class="text-center py-16 text-slate-400"><i class="fa-solid fa-circle-notch fa-spin text-brand-600 text-xl mb-2"></i><p>Syncing live with Google Sheet...</p></td></tr>`;
+      
+      if (typeof google !== 'undefined' && google.script) {
+        google.script.run
+          .withSuccessHandler(onTicketsLoaded)
+          .withFailureHandler(err => showToast("Error loading tickets: " + err, 'error'))
+          .getTickets();
+      } else {
+        setTimeout(() => { onTicketsLoaded(getSampleData()); }, 400);
+      }
+    }
+
+    function onTicketsLoaded(data) {
+      allTickets = data || [];
+      updateKPIs();
+      renderTable();
+      showToast("Live data synchronized", "success");
+    }
+
+    function updateKPIs() {
+      const supportCount = allTickets.filter(t => isSupportQueue(t)).length;
+      const financeCount = allTickets.filter(t => isFinanceQueue(t)).length;
+      const settledCount = allTickets.filter(t => String(t.payout_status || t.status || '').includes('Settled')).length;
+
+      document.getElementById('kpiActive').innerText = allTickets.length;
+      document.getElementById('kpiSupport').innerText = supportCount;
+      document.getElementById('kpiFinance').innerText = financeCount;
+      document.getElementById('kpiSettled').innerText = settledCount;
+
+      document.getElementById('badgeSupport').innerText = supportCount;
+      document.getElementById('badgeFinance').innerText = financeCount;
+    }
+
+    function isSupportQueue(t) {
+      const s = String(t.status || '').toLowerCase();
+      const p = String(t.payout_status || '').toLowerCase();
+      return !s.includes('verified') && !s.includes('settled') && !s.includes('declined') && !p.includes('queued') && !p.includes('settled');
+    }
+
+    function isFinanceQueue(t) {
+      const s = String(t.status || '').toLowerCase();
+      const p = String(t.payout_status || '').toLowerCase();
+      return (s.includes('verified') || p.includes('queued') || p.includes('pending')) && !p.includes('settled') && !s.includes('declined');
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('ticketTableBody');
+      const q = document.getElementById('searchInput').value.toLowerCase().trim();
+      const ch = document.getElementById('channelFilter').value;
+
+      let filtered = allTickets.filter(t => {
+        if (currentTab === 'support' && !isSupportQueue(t)) return false;
+        if (currentTab === 'finance' && !isFinanceQueue(t)) return false;
+        if (ch !== 'ALL' && String(t.channel) !== ch) return false;
+        if (q) {
+          const matchStr = `${t.ticket_id} ${t.agent_name} ${t.route} ${t.notes}`.toLowerCase();
+          if (!matchStr.includes(q)) return false;
+        }
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center py-16 text-slate-400 font-medium">No tickets found matching current view filters.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(t => {
+        const tid = t.ticket_id || 'RF-TBD';
+        const amt = Number(t.refund_amount || 0).toLocaleString('en-IN');
+        const status = t.status || 'Under Review';
+        const payout = t.payout_status || 'Pending';
+        const channel = t.channel || 'Portal';
+
+        return `
+          <tr class="hover:bg-slate-50/80 transition cursor-pointer group" onclick="openDrawer('${tid}')">
+            <td class="py-3.5 px-5 font-bold text-brand-700 flex items-center gap-1.5">
+              <span>${tid}</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-[10px] opacity-0 group-hover:opacity-100 text-slate-400 transition"></i>
+            </td>
+            <td class="py-3.5 px-5 text-slate-900 font-semibold">${t.agent_name || 'Agent Partner'}</td>
+            <td class="py-3.5 px-5 font-bold text-slate-700">${t.route || 'DEL-DXB'}</td>
+            <td class="py-3.5 px-5 font-black text-slate-900">₹${amt}</td>
+            <td class="py-3.5 px-5">${renderChannelPill(channel)}</td>
+            <td class="py-3.5 px-5">${renderStatusBadge(status)}</td>
+            <td class="py-3.5 px-5">${renderPayoutBadge(payout)}</td>
+            <td class="py-3.5 px-5 text-right space-x-1.5" onclick="event.stopPropagation()">
+              ${renderActions(t)}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderChannelPill(ch) {
+      if (ch === 'WhatsApp') return `<span class="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200/60 text-[10px] font-bold"><i class="fa-brands fa-whatsapp"></i> WhatsApp</span>`;
+      if (ch === 'Email') return `<span class="px-2 py-0.5 rounded-md bg-rose-50 text-rose-700 border border-rose-200/60 text-[10px] font-bold"><i class="fa-regular fa-envelope"></i> Email</span>`;
+      return `<span class="px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200/60 text-[10px] font-bold"><i class="fa-solid fa-globe"></i> Portal</span>`;
+    }
+
+    function renderStatusBadge(s) {
+      if (s.includes('Verified')) return `<span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-indigo-50 text-indigo-700 border border-indigo-200">Verified</span>`;
+      if (s.includes('Settled')) return `<span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200">Settled</span>`;
+      if (s.includes('Declined')) return `<span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-rose-50 text-rose-700 border border-rose-200">Declined</span>`;
+      return `<span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-amber-50 text-amber-700 border border-amber-200">${s}</span>`;
+    }
+
+    function renderPayoutBadge(p) {
+      if (p.includes('Settled')) return `<span class="text-emerald-600 font-extrabold text-[11px] flex items-center gap-1"><i class="fa-solid fa-circle-check"></i> Paid</span>`;
+      if (p.includes('Queued')) return `<span class="text-brand-600 font-extrabold text-[11px] flex items-center gap-1"><i class="fa-solid fa-clock"></i> Queued</span>`;
+      if (p.includes('Declined')) return `<span class="text-rose-600 font-extrabold text-[11px] flex items-center gap-1"><i class="fa-solid fa-circle-xmark"></i> Declined</span>`;
+      return `<span class="text-slate-400 text-[11px]">Pending Support</span>`;
+    }
+
+    function renderActions(t) {
+      const tid = t.ticket_id;
+      let html = '';
+
+      // Support actions
+      if ((currentRole === 'SUPPORT' || currentRole === 'ADMIN') && isSupportQueue(t)) {
+        html += `<button onclick="verifyTicket('${tid}')" class="px-3 py-1 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-[11px] font-bold shadow-sm transition">Verify & Push</button>`;
+      }
+
+      // Finance actions
+      if ((currentRole === 'FINANCE' || currentRole === 'ADMIN') && isFinanceQueue(t)) {
+        html += `<button onclick="openSettleModal('${tid}')" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[11px] font-bold shadow-sm transition">Settle Payout</button>`;
+        html += `<button onclick="openDeclineModal('${tid}')" class="px-3 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg text-[11px] font-bold transition">Decline</button>`;
+      }
+
+      return html || `<span class="text-slate-400 text-[11px]">No action</span>`;
+    }
+
+    function openDrawer(tid) {
+      activeTicket = allTickets.find(t => t.ticket_id === tid);
+      if (!activeTicket) return;
+
+      document.getElementById('drawerTicketId').innerText = tid;
+      document.getElementById('drawerAgent').innerText = activeTicket.agent_name || 'Travel Partner';
+      document.getElementById('drawerRoute').innerText = activeTicket.route || 'DEL-DXB';
+      document.getElementById('drawerAmount').innerText = `₹${Number(activeTicket.refund_amount || 0).toLocaleString('en-IN')}`;
+      document.getElementById('drawerContact').innerText = activeTicket.sender_contact || 'None';
+      document.getElementById('drawerConfidence').innerText = activeTicket.confidence_score ? `${Math.round(activeTicket.confidence_score * 100)}% Match` : '95% Match';
+      document.getElementById('drawerRawMessage').innerText = activeTicket.raw_message || activeTicket.notes || 'No raw message string';
+      document.getElementById('drawerNotes').innerText = activeTicket.notes || 'No additional notes.';
+      document.getElementById('drawerChannelBadge').innerText = activeTicket.channel || 'Portal';
+
+      // Actions in drawer
+      const actionsDiv = document.getElementById('drawerActions');
+      actionsDiv.innerHTML = renderActions(activeTicket);
+
+      document.getElementById('drawerBackdrop').classList.remove('hidden');
+      document.getElementById('ticketDrawer').classList.remove('translate-x-full');
+    }
+
+    function closeDrawer() {
+      document.getElementById('drawerBackdrop').classList.add('hidden');
+      document.getElementById('ticketDrawer').classList.add('translate-x-full');
+    }
+
+    function verifyTicket(tid) {
+      if (!confirm(`Confirm fare eligibility and push ${tid} to Finance Payout Queue?`)) return;
+      const user = document.getElementById('userEmail').innerText;
+      
+      if (typeof google !== 'undefined' && google.script) {
+        google.script.run
+          .withSuccessHandler(res => { showToast(res.message, 'success'); loadTickets(); closeDrawer(); })
+          .supportVerifyTicket(tid, user, "Verified fare rules against airline policy.");
+      } else {
+        showToast(`Ticket ${tid} verified and moved to Finance!`, 'success');
+        const target = allTickets.find(t => t.ticket_id === tid);
+        if (target) { target.status = 'Verified by Support'; target.payout_status = 'Queued for Finance'; }
+        updateKPIs(); renderTable(); closeDrawer();
+      }
+    }
+
+    function openSettleModal(tid) {
+      activeTicket = allTickets.find(t => t.ticket_id === tid);
+      if (!activeTicket) return;
+      document.getElementById('modalTicketId').innerText = tid;
+      document.getElementById('modalAgent').innerText = activeTicket.agent_name || 'Agent';
+      const gross = Number(activeTicket.refund_amount || 0);
+      document.getElementById('modalGross').value = gross;
+      document.getElementById('modalDeduction').value = 0;
+      calculateNet();
+      document.getElementById('modalSettle').classList.remove('hidden');
+    }
+
+    function calculateNet() {
+      const gross = Number(document.getElementById('modalGross').value) || 0;
+      const ded = Number(document.getElementById('modalDeduction').value) || 0;
+      const net = Math.max(0, gross - ded);
+      document.getElementById('modalNet').innerText = `₹${net.toLocaleString('en-IN')}`;
+    }
+
+    function submitFinanceSettlement() {
+      const tid = document.getElementById('modalTicketId').innerText;
+      const gross = Number(document.getElementById('modalGross').value);
+      const ded = Number(document.getElementById('modalDeduction').value);
+      const net = gross - ded;
+      const reason = document.getElementById('modalDeductionReason').value;
+      const user = document.getElementById('userEmail').innerText;
+
+      if (typeof google !== 'undefined' && google.script) {
+        google.script.run
+          .withSuccessHandler(res => { closeModal('modalSettle'); showToast(res.message, 'success'); loadTickets(); closeDrawer(); })
+          .financeSettlePayout(tid, net, ded, user, `Deduction: ₹${ded} (${reason})`);
+      } else {
+        showToast(`Payout of ₹${net} settled for ${tid}!`, 'success');
+        closeModal('modalSettle');
+        if (activeTicket) { activeTicket.payout_status = 'Refund Settled'; activeTicket.status = 'Refund Settled'; activeTicket.amount_paid = net; activeTicket.deduction = ded; }
+        updateKPIs(); renderTable(); closeDrawer();
+      }
+    }
+
+    function openDeclineModal(tid) {
+      activeTicket = allTickets.find(t => t.ticket_id === tid);
+      document.getElementById('declineTicketId').innerText = tid;
+      document.getElementById('modalDecline').classList.remove('hidden');
+    }
+
+    function submitFinanceDecline() {
+      const tid = document.getElementById('declineTicketId').innerText;
+      const reasonCode = document.getElementById('declineReasonCode').value;
+      const notes = document.getElementById('declineNotes').value;
+      const user = document.getElementById('userEmail').innerText;
+
+      if (typeof google !== 'undefined' && google.script) {
+        google.script.run
+          .withSuccessHandler(res => { closeModal('modalDecline'); showToast(res.message, 'success'); loadTickets(); closeDrawer(); })
+          .financeDeclineRefund(tid, reasonCode, user, notes);
+      } else {
+        showToast(`Ticket ${tid} marked Declined with reason`, 'info');
+        closeModal('modalDecline');
+        if (activeTicket) { activeTicket.payout_status = 'Declined'; activeTicket.status = 'Declined'; }
+        updateKPIs(); renderTable(); closeDrawer();
+      }
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    function showToast(msg, type) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMsg');
+      const toastIcon = document.getElementById('toastIcon');
+
+      toastMsg.innerText = msg;
+      if (type === 'error') {
+        toastIcon.className = "fa-solid fa-triangle-exclamation text-rose-400 text-base";
+      } else if (type === 'info') {
+        toastIcon.className = "fa-solid fa-circle-info text-blue-400 text-base";
+      } else {
+        toastIcon.className = "fa-solid fa-circle-check text-emerald-400 text-base";
+      }
+
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 3500);
+    }
+
+    function getSampleData() {
+      return [
+        { "ticket_id": "RF-1099", "agent_name": "Peak Journeys", "route": "DEL-DXB", "refund_amount": 22000, "channel": "Email", "status": "Under Review", "payout_status": "Pending Support Verification", "raw_message": "Hi Support, cancelled booking last week for DEL-DXB. Please refund.", "sender_contact": "bookings@peakjourneys.com" },
+        { "ticket_id": "RF-1098", "agent_name": "Nomad Travel", "route": "BLR-MAA", "refund_amount": 14500, "channel": "WhatsApp", "status": "Verified by Support", "payout_status": "Queued for Finance", "raw_message": "Bhai refund ka kya hua? BLR-MAA wala. 2 hafte ho gaye.", "sender_contact": "+919876543210" },
+        { "ticket_id": "RF-1286", "agent_name": "Sunrise Trips", "route": "DEL-KTM", "refund_amount": 10200, "channel": "WhatsApp", "status": "Refund Settled", "payout_status": "Refund Settled", "deduction": 1200, "amount_paid": 9000, "sender_contact": "+919876543211" }
+      ];
+    }
+  </script>
+</body>
+</html>
