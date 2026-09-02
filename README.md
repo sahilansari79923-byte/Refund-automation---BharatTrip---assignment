@@ -1,9 +1,11 @@
-# ✈️ BharatTrip • AI Refund Operations Command Center
+# BharatTrip • AI Refund Operations Command Center
+### 🚀 [Open Live Dashboard →](https://script.google.com/macros/s/AKfycbzFmrDJVl2U_Af2E_vlXjsn1K8i1cZumlzV7b2_h9LyVP3KXRI0bPj6NKAygrefwMJW/exec)
+
 > **An AI-powered operational system that unifies Support & Finance, eliminates off-tracker refund leaks, and reduces agent escalations from 51.4% to <5% with zero new headcount.**
 
 ---
 
-## 📖 The Real Problem (In Plain English)
+##  The Real Problem (In Plain English)
 
 At BharatTrip, refund volume remained completely flat (~150 requests/month) for five months straight. Yet in June, customer and travel agent escalations suddenly **tripled to 75 complaints** (a 51.4% escalation rate). 
 
@@ -15,7 +17,7 @@ When we dug into the raw operational data across 755 Support tickets, 689 Financ
 
 ---
 
-## 💡 The Solution Architecture
+##  The Solution Architecture
 
 Instead of asking leadership for more headcount or building an expensive custom SaaS tool, we designed a **lean, resilient 3-part AI Ops system**:
 
@@ -36,7 +38,7 @@ Instead of asking leadership for more headcount or building an expensive custom 
 
 ---
 
-## 🔄 How It Works in Real Life (Step-by-Step)
+##  How It Works in Real Life (Step-by-Step)
 
 ```
 [Day 1: 10:00 AM]  Travel Agent sends a messy WhatsApp message or email
@@ -72,13 +74,13 @@ Instead of asking leadership for more headcount or building an expensive custom 
        ▼
 [Day 2: 11:00 AM]  MESSAGE 2: Resolution & Transparent Breakdown
                    ↳ n8n Status Watcher detects "Refund Settled" and auto-dispatches Message 2:
-                     "✅ Refund Processed! Ticket RF-1098 (BLR-MAA) has been transferred to your bank.
+                     " Refund Processed! Ticket RF-1098 (BLR-MAA) has been transferred to your bank.
                       • Claimed: ₹14,500 | Deduction: ₹1,500 (Airline Tariff Fee) | Net Credited: ₹13,000."
 ```
 
 ---
 
-## 🤖 How We Use AI (The Human-in-the-Loop Intelligence)
+##  How We Use AI (The Human-in-the-Loop Intelligence)
 
 We avoided generic chatbots and used AI specifically where human manual effort previously caused bottlenecks:
 
@@ -107,7 +109,7 @@ The pipeline checks if an open ticket for the same PNR/route already exists in t
 
 ---
 
-## 🚀 Quickstart: How to Run the Prototype
+##  Quickstart: How to Run the Prototype
 
 ### 1. Import n8n Workflow
 1. Open your n8n instance and click **Add Workflow ➡️ Import from File**.
@@ -123,7 +125,7 @@ The pipeline checks if an open ticket for the same PNR/route already exists in t
 
 ---
 
-## 📊 Business Impact at 30 Days
+##  Business Impact at 30 Days
 
 | Metric | Historical Baseline (June) | With AI Ops Solution (Day 30) |
 |---|---|---|
