@@ -135,4 +135,4 @@ The pipeline checks if an open ticket for the same PNR/route already exists in t
 
 ---
 
-*Built with ❤️ for BharatTrip Operations • Solved with pragmatic AI, clean systems thinking, and zero bloat.*
+
