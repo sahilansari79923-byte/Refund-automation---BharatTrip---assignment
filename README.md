@@ -1,7 +1,11 @@
-# BharatTrip • AI Refund Operations Command Center
+# BharatTrip - AI Refund Operations Command Center
 ### 🚀 [Open Live Dashboard →](https://script.google.com/macros/s/AKfycbzFmrDJVl2U_Af2E_vlXjsn1K8i1cZumlzV7b2_h9LyVP3KXRI0bPj6NKAygrefwMJW/exec)
-![]()
-![n8n Automation Pipeline]()
+![](https://github.com/sahilansari79923-byte/Refund-automation---BharatTrip---assignment/blob/main/Snaps/Screenshot%202026-09-05%20220636.png)
+
+
+---
+
+![n8n Automation Pipeline](https://github.com/sahilansari79923-byte/Refund-automation---BharatTrip---assignment/blob/main/Snaps/Screenshot%20(1365).png)
 ### 🛢️ [Database →](https://docs.google.com/spreadsheets/d/1IMflyBx1J-dYq_LR9zYqkHB0fMSUEUd1IoaTUEZiBgA/edit?gid=0#gid=0)
 
 > **An AI-powered operational system that unifies Support & Finance, eliminates off-tracker refund leaks, and reduces agent escalations from 51.4% to <5% with zero new headcount.**
