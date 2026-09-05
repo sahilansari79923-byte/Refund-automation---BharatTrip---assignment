@@ -12,7 +12,7 @@
 
 ---
 
-##  The Real Problem (In Plain English)
+##  The Real Problem
 
 At BharatTrip, refund volume remained completely flat (~150 requests/month) for five months straight. Yet in June, customer and travel agent escalations suddenly **tripled to 75 complaints** (a 51.4% escalation rate). 
 
